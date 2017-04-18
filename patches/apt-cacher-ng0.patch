@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1340ab1..b5bfaf6 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -120,6 +120,8 @@ option(USE_SSL "Use OpenSSL library for TLS and other crypto functionality" on)
+
+ IF(CMAKE_SYSTEM MATCHES "Darwin")
+         _append(ACNG_COMPFLAGS -D_DARWIN_C_SOURCE)
++        #it seems like clang++ still needs to be explicitly told to support c++11
++        _append(ACNG_CXXFLAGS -std=c++11)
+ ENDIF()
+
+ IF(CMAKE_SYSTEM MATCHES "CYGWIN")
