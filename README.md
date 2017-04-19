@@ -7,10 +7,10 @@
         * Copy link "snapshot" for the commits tree, (gets a .tar.gz archive)
 * `brew create 'https://alioth.debian.org/plugins/scmgit/cgi-bin/gitweb.cgi?p=apt-cacher-ng/apt-cacher-ng.git;a=snapshot;h=a59728c2239758a7d7986e8eadf2f65fea2bf029;sf=tgz' --cmake --tap mprzybylski/carboy`
 
-# Current hangup:
+## Current hangup:
 ```
 OS X doesn't have fmemopen()
 ```
 
-# TODO: 
+## TODO: 
 Create a brew formula for this: https://github.com/NimbusKit/memorymapping/tree/master/src
