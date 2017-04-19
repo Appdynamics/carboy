@@ -14,12 +14,16 @@ class AptCacherNg < Formula
 
   #TODO: add HEAD pointer
 
+  depends_on "pkg-config" => :build # so that cmake can find all of its dependencies
   depends_on "cmake" => :build
   depends_on "openssl" => :build
   depends_on :osxfuse => :build
   depends_on "xz" => :build
-  depends_on "pkg-config" => :build # so that cmake's pkg_check_modules() can hopefully find openssl
-  # linux build depends on libwrap, but we'll pass
+
+  patch do
+    url "https://raw.githubusercontent.com/mprzybylski/carboy/develop/patches/apt-cacher-ng0.patch"
+    sha256 "50a6763d557d82d1ed04a8643326c911f9976ef4cab45348ae44c59f52b451ff"
+  end
 
   def install
     # ENV.deparallelize  # if your formula fails when building in parallel
