@@ -39,7 +39,7 @@ class AptCacherNg < Formula
     # apt-cacher-ng relies on the Linux-only system call fmemopen()
     # patch an emulation wrapper for fmemopen() into the build.
     url "https://raw.githubusercontent.com/mprzybylski/carboy/develop/patches/apt-cacher-ng_include-fmemopen.patch"
-    sha256 "89213a50694d486e0630510b310219ca6b87261154696dcb1320c59bd7989844"
+    sha256 "f59fc5a0dfccef8c4a7857f3e38ef28da1fd226406a83ca950780cee1d81a80c"
   end
 
   def install
