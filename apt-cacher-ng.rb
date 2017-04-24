@@ -19,6 +19,7 @@ class AptCacherNg < Formula
   depends_on "openssl" => :build
   depends_on :osxfuse => :build
   depends_on "xz" => :build
+  depends_on "libfmemopen" => :build
 
   patch do
     # Patch CMakeLists.txt to include -std=c++11 in its clang++ flags
@@ -32,6 +33,13 @@ class AptCacherNg < Formula
     # patterned after https://github.com/tavianator/bfs/pull/13/files#diff-8b2aa0a4ac567369abb850524cda081c
     url "https://raw.githubusercontent.com/mprzybylski/carboy/develop/patches/apt-cacher-ng_osx-timespec-aliases.patch"
     sha256 "b7706efb8b8fc0884608b307cab92980c0d246d074a9b06c80cf68d8cfd81bfc"
+  end
+
+  patch do
+    # apt-cacher-ng relies on the Linux-only system call fmemopen()
+    # patch an emulation wrapper for fmemopen() into the build.
+    url "https://raw.githubusercontent.com/mprzybylski/carboy/develop/patches/apt-cacher-ng_include-fmemopen.patch"
+    sha256 "a6dcff8db1415955847ef14c1c85556dbe7fcb6d230464c2ce3eee13a676a7b6"
   end
 
   def install

@@ -1,0 +1,23 @@
+index b5bfaf6..003e249 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -122,6 +122,7 @@ IF(CMAKE_SYSTEM MATCHES "Darwin")
+         _append(ACNG_COMPFLAGS -D_DARWIN_C_SOURCE)
+         #it seems like clang++ still needs to be explicitly told to support c++11
+         _append(ACNG_CXXFLAGS -std=c++11)
++        pkg_check_modules(FMEMOPEN REQUIRED libfmemopen)
+ ENDIF()
+
+ IF(CMAKE_SYSTEM MATCHES "CYGWIN")
+diff --git a/source/meta.cc b/source/meta.cc
+index 30f74c7..6f631eb 100644
+--- a/source/meta.cc
++++ b/source/meta.cc
+@@ -9,6 +9,7 @@
+ #include <cstdio>
+ #include <iostream>
+ #include <algorithm>
++#include <fmemopen.h>
+
+ #ifdef HAVE_WORDEXP
+ #include <wordexp.h>
