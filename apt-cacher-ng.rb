@@ -24,7 +24,7 @@ class AptCacherNg < Formula
   patch do
     # Patch CMakeLists.txt to include -std=c++11 in its clang++ flags
     url "https://raw.githubusercontent.com/mprzybylski/carboy/develop/patches/apt-cacher-ng_osx-cxxflags.patch"
-    sha256 "c8b814ac098d335528a58912ed6158e9d3bc36995a271d94c3109cf36a436eef"
+    sha256 "ff6fc8b3d844b095aafcfcd47bbfc948e2f405ad13e0add602534fcc27a442db"
   end
 
   patch do
@@ -39,7 +39,7 @@ class AptCacherNg < Formula
     # apt-cacher-ng relies on the Linux-only system call fmemopen()
     # patch an emulation wrapper for fmemopen() into the build.
     url "https://raw.githubusercontent.com/mprzybylski/carboy/develop/patches/apt-cacher-ng_include-fmemopen.patch"
-    sha256 "d9776014424a5737bfc35a79ef7f7056685f25607746b29525bb9ff8b0d88266"
+    sha256 "c8b814ac098d335528a58912ed6158e9d3bc36995a271d94c3109cf36a436eef"
   end
 
   def install
