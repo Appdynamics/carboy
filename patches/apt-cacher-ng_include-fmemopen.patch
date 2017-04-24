@@ -1,11 +1,14 @@
-index b5bfaf6..003e249 100644
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b5bfaf6..8c68771 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -122,6 +122,7 @@ IF(CMAKE_SYSTEM MATCHES "Darwin")
+@@ -122,6 +122,9 @@ IF(CMAKE_SYSTEM MATCHES "Darwin")
          _append(ACNG_COMPFLAGS -D_DARWIN_C_SOURCE)
          #it seems like clang++ still needs to be explicitly told to support c++11
          _append(ACNG_CXXFLAGS -std=c++11)
++        # look for fmemopen()
 +        pkg_check_modules(FMEMOPEN REQUIRED libfmemopen)
++        list(APPEND CompLibs fmemopen)
  ENDIF()
 
  IF(CMAKE_SYSTEM MATCHES "CYGWIN")

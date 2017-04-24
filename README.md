@@ -13,8 +13,7 @@ OS X doesn't have fmemopen()
 ```
 
 ## TODO: 
-* Create a brew formula for this: https://github.com/NimbusKit/memorymapping/tree/master/src
-  * Looks like I'll have to fork that project and create the CMake foo around it to build it as a shared library
+* Need to get linker args right for `meta.cc`, `libfmemopen`
 
 # fmemopen
 
