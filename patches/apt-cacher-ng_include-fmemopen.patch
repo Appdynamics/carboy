@@ -13,15 +13,18 @@ index b5bfaf6..78cefbb 100644
 
  IF(CMAKE_SYSTEM MATCHES "CYGWIN")
 diff --git a/fs/CMakeLists.txt b/fs/CMakeLists.txt
-index 49791e3..36b66c5 100644
+index 49791e3..4d1586b 100644
 --- a/fs/CMakeLists.txt
 +++ b/fs/CMakeLists.txt
-@@ -26,10 +26,11 @@ if(fuse_FOUND AND HAVE_FUSE_25)
+@@ -24,12 +24,13 @@ if(fuse_FOUND AND HAVE_FUSE_25)
+         SET_TARGET_PROPERTIES(acngfs PROPERTIES COMPILE_FLAGS "${ACNG_COMPFLAGS} ${ACNG_CXXFLAGS} ${acngfs_cflags}")
+         INSTALL(TARGETS acngfs DESTINATION ${LIBDIR})
          if(HAVE_DLOPEN)
-                 _append(EXTRA_LIBS_ACNGFS dl)
+-                _append(EXTRA_LIBS_ACNGFS dl)
++                list(APPEND EXTRA_LIBS_ACNGFS dl)
          endif()
 +        IF(CMAKE_SYSTEM MATCHES "Darwin")
-+                _append(EXTRA_LIBS_ACNGFS fmemopen)
++                list(APPEND EXTRA_LIBS_ACNGFS fmemopen)
 +        ENDIF()
          TARGET_LINK_LIBRARIES(acngfs ${fuse_LDFLAGS} ${BaseNetworkLibs} ${SSL_LIB_LIST} ${EXTRA_LIBS_ACNGFS} ${CMAKE_THREAD_LIBS_INIT})
 

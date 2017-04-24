@@ -9,11 +9,11 @@
 
 ## Current hangup:
 ```
-OS X doesn't have fmemopen()
+_append() isn't doing the right thing in fs/CMakeLists.txt with fmemopen
 ```
 
 ## TODO: 
-* Need to get linker args right for `meta.cc`, `libfmemopen`
+
 
 # fmemopen
 
