@@ -1,0 +1,109 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 78cefbb..9f765d0 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -26,9 +26,20 @@ INCLUDE(CheckSymbolExists)
+ INCLUDE(FindPkgConfig)
+
+ set(PACKAGE "apt-cacher-ng")
++
+ IF(NOT DEFINED(CMAKE_INSTALL_PREFIX))
+ set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE STRING "Target file space")
+ ENDIF()
++
++if(DEFINED(HOMEBREW_PREFIX))
++    set(VARDIR "${HOMEBREW_PREFIX}/var")
++    set(RUNDIR "${VARDIR}/run")
++else()
++    if(NOT DEFINED(VARDIR))
++        set(VARDIR "/var")
++    endif()
++endif()
++
+ IF(NOT DEFINED(DATADIR))
+        set(DATADIR "${CMAKE_INSTALL_PREFIX}/share" CACHE STRING "Shared data files directory")
+ ENDIF()
+@@ -387,6 +398,8 @@ add_subdirectory(fs)
+ add_subdirectory(source)
+ add_subdirectory(conf)
+ add_subdirectory(systemd)
++add_subdirectory(homebrew)
++
+
+ ###
+ ### Extra install rules for static files
+diff --git a/conf/acng.conf.in b/conf/acng.conf.in
+index 79018a9..5b9201a 100644
+--- a/conf/acng.conf.in
++++ b/conf/acng.conf.in
+@@ -19,11 +19,11 @@
+
+ # Storage directory for downloaded data and related maintenance activity.
+ #
+-CacheDir: /var/cache/apt-cacher-ng
++CacheDir: @VARDIR@/cache/apt-cacher-ng
+
+ # Log file directory, can be set empty to disable logging
+ #
+-LogDir: /var/log/apt-cacher-ng
++LogDir: @VARDIR@/log/apt-cacher-ng
+
+ # A place to look for additional configuration and resource files if they are not
+ # found in the configuration directory
+@@ -89,7 +89,7 @@ ReportPage: acng-report.html
+ #
+ # Default: not set, UNIX socket bridge is disabled.
+ #
+-# SocketPath:/var/run/apt-cacher-ng/socket
++# SocketPath:@VARDIR@/run/apt-cacher-ng/socket
+
+ # If set to 1, makes log files be written to disk on every new line. Default
+ # is 0, buffers are flushed after the client disconnects. Technically,
+@@ -109,7 +109,7 @@ ReportPage: acng-report.html
+ # Store the pid of the daemon process in the specified text file.
+ # Default: disabled
+ #
+-# PidFile: /var/run/apt-cacher-ng/pid
++# PidFile: @VARDIR@/run/apt-cacher-ng/pid
+
+ # Forbid outgoing connections and work without an internet connection or
+ # respond with 503 error where it's not possible.
+diff --git a/homebrew/CMakeLists.txt b/homebrew/CMakeLists.txt
+index e69de29..4cae09c 100644
+--- a/homebrew/CMakeLists.txt
++++ b/homebrew/CMakeLists.txt
+@@ -0,0 +1,12 @@
++IF(DEFINED HOMEBREW_PREFIX)
++    set(LOGROTATE_FILE_STAGE_PATH "${CMAKE_CURRENT_BINARY_DIR}/apt-cacher-ng.logrotate")
++    CONFIGURE_FILE(apt-cacher-ng.logrotate.in ${LOGROTATE_FILE_STAGE_PATH})
++    install(FILES ${LOGROTATE_FILE_STAGE_PATH} DESTINATION "${HOMEBREW_PREFIX}/etc/logrotate.d")
++
++    set(WRAPPER_SCRIPT_STAGE_PATH "${CMAKE_CURRENT_BINARY_DIR}/acng-wrapper.sh")
++    CONFIGURE_FILE(acng-wrapper.sh.in ${WRAPPER_SCRIPT_STAGE_PATH})
++    install(FILES ${WRAPPER_SCRIPT_STAGE_PATH}
++            DESTINATION ${SBINDIR}
++            #paranoid permissions on wrapper script
++            PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ WORLD_READ)
++ENDIF()
+\ No newline at end of file
+diff --git a/homebrew/acng-wrapper.sh.in b/homebrew/acng-wrapper.sh.in
+index 212c4ba..6333a9f 100644
+--- a/homebrew/acng-wrapper.sh.in
++++ b/homebrew/acng-wrapper.sh.in
+@@ -1 +1,14 @@
+-#!/usr/bin/env bash
+\ No newline at end of file
++#!/bin/bash
++
++# wrapper script to enforce service dependency between apt-cacher-ng and logrotate
++
++BREWCMD=@HOMEBREW_PREFIX@/bin/brew
++
++if ! BREWCMD services start logrotate >/dev/null 2>&1; then
++    >&2 echo "'brew services start logrotate. failed."
++    >&2 echo "Skipping apt-cacher-ng start to protect disk space."
++    exit 1
++fi
++
++# Launch apt-cacher-ng
++@SBINDIR@/apt-cacher-ng -c @CFGDIR@ ForeGround=1

@@ -10,7 +10,7 @@ class AptCacherNg < Formula
   sha256 "9dffe361d5b82608dc1b4e8c8f8432216d0bd7732b0eeea77dbfcba2cc47f587"
   version "3-4"
   version_scheme 0
-  revision 0
+  revision 1
 
   #TODO: add HEAD pointer
 
@@ -20,6 +20,7 @@ class AptCacherNg < Formula
   depends_on :osxfuse => :build
   depends_on "xz" => :build
   depends_on "libfmemopen" => :build
+  depends_on "logrotate" => :run
 
   patch do
     # Patch CMakeLists.txt to include -std=c++11 in its clang++ flags
@@ -42,11 +43,46 @@ class AptCacherNg < Formula
     sha256 "c8b814ac098d335528a58912ed6158e9d3bc36995a271d94c3109cf36a436eef"
   end
 
+  patch do
+
+  end
+
+  # see http://www.rubydoc.info/github/Homebrew/brew/Formula#plist-instance_method
+  def plist; <<-PLIST.undent
+     <?xml version="1.0" encoding="UTF-8"?>
+     <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+     <plist version="1.0">
+     <dict>
+       <key>Label</key>
+         <string>#{plist_name}</string>
+       <key>ProgramArguments</key>
+       <array>
+         <string>#{sbin}/acng-wrapper.sh</string>
+       </array>
+       <key>RunAtLoad</key>
+       <true/>
+       <key>KeepAlive</key>
+       <true/>
+       <key>StandardErrorPath</key>
+       <string>#{HOMEBREW_PREFIX}/var/log/apt-cacher-ng/apt-cache.err</string>
+       <key>StandardOutPath</key>
+       <string>/dev/null</string>
+     </plist>
+  PLIST
+end
+
   def install
     # ENV.deparallelize  # if your formula fails when building in parallel
 
-    system "cmake", ".", *std_cmake_args
+    system "cmake", ".", *std_cmake_args, "-DHOMEBREW_PREFIX=#{HOMEBREW_PREFIX}",
+           "-DLAUNCHD_SERVICE_TARGET=gui/#{Process.uid}/#{plist_name}"
     system "make", "install" # if this fails, try separate make/make install steps
+  end
+
+  def post_install
+    mkdir "#{HOMEBREW_PREFIX}/var/cache/apt-cacher-ng"
+    mkdir "#{HOMEBREW_PREFIX}/var/log/apt-cacher-ng"
+
   end
 
   test do
