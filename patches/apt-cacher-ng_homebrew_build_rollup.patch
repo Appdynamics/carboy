@@ -132,7 +132,7 @@ index 0000000..6333a9f
 +
 +BREWCMD=@HOMEBREW_PREFIX@/bin/brew
 +
-+if ! BREWCMD services start logrotate >/dev/null 2>&1; then
++if ! $BREWCMD services start logrotate >/dev/null 2>&1; then
 +    >&2 echo "'brew services start logrotate. failed."
 +    >&2 echo "Skipping apt-cacher-ng start to protect disk space."
 +    exit 1

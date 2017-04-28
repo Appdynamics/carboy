@@ -10,7 +10,7 @@ class AptCacherNg < Formula
   sha256 "9dffe361d5b82608dc1b4e8c8f8432216d0bd7732b0eeea77dbfcba2cc47f587"
   version "3-4"
   version_scheme 0
-  revision 1
+  revision 3
 
   #TODO: add HEAD pointer
 
@@ -25,7 +25,7 @@ class AptCacherNg < Formula
   patch do
     # Rollup of all MacOS / Homebrew compile and install fixes
     url "https://raw.githubusercontent.com/mprzybylski/carboy/develop/patches/apt-cacher-ng_homebrew_build_rollup.patch"
-    sha256 "ae9e25e2909ee8d73e1e2da69699bbd5934b997426df1fb25535daa3dd099b3b"
+    sha256 "6b2be5f974da91fbe5140cdf59b8c73e4a67594c85bd90f5a116f510b4417f90"
   end
 
 
@@ -34,21 +34,22 @@ class AptCacherNg < Formula
      <?xml version="1.0" encoding="UTF-8"?>
      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
      <plist version="1.0">
-     <dict>
-       <key>Label</key>
-         <string>#{plist_name}</string>
-       <key>ProgramArguments</key>
-       <array>
-         <string>#{sbin}/acng-wrapper.sh</string>
-       </array>
-       <key>RunAtLoad</key>
-       <true/>
-       <key>KeepAlive</key>
-       <true/>
-       <key>StandardErrorPath</key>
-       <string>#{HOMEBREW_PREFIX}/var/log/apt-cacher-ng/apt-cache.err</string>
-       <key>StandardOutPath</key>
-       <string>/dev/null</string>
+       <dict>
+         <key>Label</key>
+           <string>#{plist_name}</string>
+         <key>ProgramArguments</key>
+         <array>
+           <string>#{sbin}/acng-wrapper.sh</string>
+         </array>
+         <key>RunAtLoad</key>
+         <true/>
+         <key>KeepAlive</key>
+         <true/>
+         <key>StandardErrorPath</key>
+         <string>#{HOMEBREW_PREFIX}/var/log/apt-cacher-ng/apt-cache.err</string>
+         <key>StandardOutPath</key>
+         <string>/dev/null</string>
+       </dict>
      </plist>
   PLIST
 end
