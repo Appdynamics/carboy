@@ -10,7 +10,7 @@ class AptCacherNg < Formula
   sha256 "9dffe361d5b82608dc1b4e8c8f8432216d0bd7732b0eeea77dbfcba2cc47f587"
   version "3-4"
   version_scheme 0
-  revision 4
+  revision 5
 
   #TODO: add HEAD pointer
 
@@ -28,8 +28,9 @@ class AptCacherNg < Formula
     sha256 "dfc47335ba1bedf3407b6f5fc66c94ed15ae4b5ccb89a7d503488b525a4c4575"
   end
 
-
-  # see http://www.rubydoc.info/github/Homebrew/brew/Formula#plist-instance_method
+  # for automatic start at login time
+  # see http://www.rubydoc.info/github/Homebrew/brew/Formula#plist-instance_method and launchd.plist(5)
+  # for more details
   def plist; <<-PLIST.undent
      <?xml version="1.0" encoding="UTF-8"?>
      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -46,7 +47,7 @@ class AptCacherNg < Formula
          <key>KeepAlive</key>
          <true/>
          <key>StandardErrorPath</key>
-         <string>#{HOMEBREW_PREFIX}/var/log/apt-cacher-ng/apt-cache.err</string>
+         <string>#{HOMEBREW_PREFIX}/var/log/apt-cacher-ng/apt-cacher.err</string>
          <key>StandardOutPath</key>
          <string>/dev/null</string>
        </dict>
