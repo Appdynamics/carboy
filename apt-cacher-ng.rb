@@ -10,7 +10,7 @@ class AptCacherNg < Formula
   sha256 "9dffe361d5b82608dc1b4e8c8f8432216d0bd7732b0eeea77dbfcba2cc47f587"
   version "3-4"
   version_scheme 0
-  revision 5
+  revision 7
 
   #TODO: add HEAD pointer
 
@@ -25,7 +25,7 @@ class AptCacherNg < Formula
   patch do
     # Rollup of all MacOS / Homebrew compile and install fixes
     url "https://raw.githubusercontent.com/mprzybylski/carboy/develop/patches/apt-cacher-ng_homebrew_build_rollup.patch"
-    sha256 "dfc47335ba1bedf3407b6f5fc66c94ed15ae4b5ccb89a7d503488b525a4c4575"
+    sha256 "d2e98517e2dcde418f95689131ccb1f1acb966ac07797eefe18f4d72f3714f3e"
   end
 
   # for automatic start at login time
@@ -58,7 +58,7 @@ end
   def install
     # ENV.deparallelize  # if your formula fails when building in parallel
 
-    system "cmake", ".", *std_cmake_args, "-DHOMEBREW_PREFIX=#{HOMEBREW_PREFIX}",
+    system "cmake", ".", *std_cmake_args, "-DHOMEBREW_PREFIX=#{HOMEBREW_PREFIX}", "-DSYSCONFDIR=#{etc}",
            "-DLAUNCHD_SERVICE_TARGET=gui/#{Process.uid}/#{plist_name}"
     system "make", "install" # if this fails, try separate make/make install steps
   end
