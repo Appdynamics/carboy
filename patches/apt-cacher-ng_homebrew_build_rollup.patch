@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 1340ab1..9f765d0 100644
+index 1340ab1..39186d5 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -26,9 +26,20 @@ INCLUDE(CheckSymbolExists)
+@@ -26,9 +26,21 @@ INCLUDE(CheckSymbolExists)
  INCLUDE(FindPkgConfig)
 
  set(PACKAGE "apt-cacher-ng")
@@ -15,6 +15,7 @@ index 1340ab1..9f765d0 100644
 +    set(VARDIR "${HOMEBREW_PREFIX}/var")
 +    set(RUNDIR "${VARDIR}/run")
 +else()
++    message("FAILED to detect HOMEBREW_PREFIX property")
 +    if(NOT DEFINED(VARDIR))
 +        set(VARDIR "/var")
 +    endif()
@@ -23,7 +24,7 @@ index 1340ab1..9f765d0 100644
  IF(NOT DEFINED(DATADIR))
  	set(DATADIR "${CMAKE_INSTALL_PREFIX}/share" CACHE STRING "Shared data files directory")
  ENDIF()
-@@ -120,6 +131,11 @@ option(USE_SSL "Use OpenSSL library for TLS and other crypto functionality" on)
+@@ -120,6 +132,11 @@ option(USE_SSL "Use OpenSSL library for TLS and other crypto functionality" on)
 
  IF(CMAKE_SYSTEM MATCHES "Darwin")
          _append(ACNG_COMPFLAGS -D_DARWIN_C_SOURCE)
@@ -35,7 +36,7 @@ index 1340ab1..9f765d0 100644
  ENDIF()
 
  IF(CMAKE_SYSTEM MATCHES "CYGWIN")
-@@ -382,6 +398,8 @@ add_subdirectory(fs)
+@@ -382,6 +399,8 @@ add_subdirectory(fs)
  add_subdirectory(source)
  add_subdirectory(conf)
  add_subdirectory(systemd)
@@ -122,7 +123,7 @@ index 0000000..4cae09c
 \ No newline at end of file
 diff --git a/homebrew/acng-wrapper.sh.in b/homebrew/acng-wrapper.sh.in
 new file mode 100644
-index 0000000..6333a9f
+index 0000000..47c0740
 --- /dev/null
 +++ b/homebrew/acng-wrapper.sh.in
 @@ -0,0 +1,14 @@

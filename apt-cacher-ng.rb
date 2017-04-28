@@ -25,7 +25,7 @@ class AptCacherNg < Formula
   patch do
     # Rollup of all MacOS / Homebrew compile and install fixes
     url "https://raw.githubusercontent.com/mprzybylski/carboy/develop/patches/apt-cacher-ng_homebrew_build_rollup.patch"
-    sha256 "6b2be5f974da91fbe5140cdf59b8c73e4a67594c85bd90f5a116f510b4417f90"
+    sha256 "ada58cba31f4dad5a80726199504ef45aa48011c8ead651c1c150b46cc135e57"
   end
 
 
