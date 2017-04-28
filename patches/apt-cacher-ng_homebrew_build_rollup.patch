@@ -11,7 +11,7 @@ index 1340ab1..39186d5 100644
  set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE STRING "Target file space")
  ENDIF()
 +
-+if(DEFINED(HOMEBREW_PREFIX))
++if(DEFINED HOMEBREW_PREFIX)
 +    set(VARDIR "${HOMEBREW_PREFIX}/var")
 +    set(RUNDIR "${VARDIR}/run")
 +else()
