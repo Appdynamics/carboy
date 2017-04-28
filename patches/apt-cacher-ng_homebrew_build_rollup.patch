@@ -1,0 +1,213 @@
+diff --git a/.gitignore b/.gitignore
+index 3e867bd..1cae86f 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -21,3 +21,4 @@ test/misc
+ conf/*test.conf
+ doc/Makefile
+ **/.gitignore
++/cmake-build-debug/
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1340ab1..9f765d0 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -26,9 +26,20 @@ INCLUDE(CheckSymbolExists)
+ INCLUDE(FindPkgConfig)
+
+ set(PACKAGE "apt-cacher-ng")
++
+ IF(NOT DEFINED(CMAKE_INSTALL_PREFIX))
+ set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE STRING "Target file space")
+ ENDIF()
++
++if(DEFINED(HOMEBREW_PREFIX))
++    set(VARDIR "${HOMEBREW_PREFIX}/var")
++    set(RUNDIR "${VARDIR}/run")
++else()
++    if(NOT DEFINED(VARDIR))
++        set(VARDIR "/var")
++    endif()
++endif()
++
+ IF(NOT DEFINED(DATADIR))
+ 	set(DATADIR "${CMAKE_INSTALL_PREFIX}/share" CACHE STRING "Shared data files directory")
+ ENDIF()
+@@ -120,6 +131,11 @@ option(USE_SSL "Use OpenSSL library for TLS and other crypto functionality" on)
+
+ IF(CMAKE_SYSTEM MATCHES "Darwin")
+         _append(ACNG_COMPFLAGS -D_DARWIN_C_SOURCE)
++        #it seems like clang++ still needs to be explicitly told to support c++11
++        _append(ACNG_CXXFLAGS -std=c++11)
++        # look for fmemopen(), 'REQUIRED' option will cause cmake fail if not present
++        pkg_check_modules(FMEMOPEN REQUIRED libfmemopen)
++        list(APPEND CompLibs fmemopen)
+ ENDIF()
+
+ IF(CMAKE_SYSTEM MATCHES "CYGWIN")
+@@ -382,6 +398,8 @@ add_subdirectory(fs)
+ add_subdirectory(source)
+ add_subdirectory(conf)
+ add_subdirectory(systemd)
++add_subdirectory(homebrew)
++
+
+ ###
+ ### Extra install rules for static files
+diff --git a/conf/acng.conf.in b/conf/acng.conf.in
+index 79018a9..5b9201a 100644
+--- a/conf/acng.conf.in
++++ b/conf/acng.conf.in
+@@ -19,11 +19,11 @@
+
+ # Storage directory for downloaded data and related maintenance activity.
+ #
+-CacheDir: /var/cache/apt-cacher-ng
++CacheDir: @VARDIR@/cache/apt-cacher-ng
+
+ # Log file directory, can be set empty to disable logging
+ #
+-LogDir: /var/log/apt-cacher-ng
++LogDir: @VARDIR@/log/apt-cacher-ng
+
+ # A place to look for additional configuration and resource files if they are not
+ # found in the configuration directory
+@@ -89,7 +89,7 @@ ReportPage: acng-report.html
+ #
+ # Default: not set, UNIX socket bridge is disabled.
+ #
+-# SocketPath:/var/run/apt-cacher-ng/socket
++# SocketPath:@VARDIR@/run/apt-cacher-ng/socket
+
+ # If set to 1, makes log files be written to disk on every new line. Default
+ # is 0, buffers are flushed after the client disconnects. Technically,
+@@ -109,7 +109,7 @@ ReportPage: acng-report.html
+ # Store the pid of the daemon process in the specified text file.
+ # Default: disabled
+ #
+-# PidFile: /var/run/apt-cacher-ng/pid
++# PidFile: @VARDIR@/run/apt-cacher-ng/pid
+
+ # Forbid outgoing connections and work without an internet connection or
+ # respond with 503 error where it's not possible.
+diff --git a/fs/CMakeLists.txt b/fs/CMakeLists.txt
+index 49791e3..4d1586b 100644
+--- a/fs/CMakeLists.txt
++++ b/fs/CMakeLists.txt
+@@ -24,12 +24,13 @@ if(fuse_FOUND AND HAVE_FUSE_25)
+         SET_TARGET_PROPERTIES(acngfs PROPERTIES COMPILE_FLAGS "${ACNG_COMPFLAGS} ${ACNG_CXXFLAGS} ${acngfs_cflags}")
+         INSTALL(TARGETS acngfs DESTINATION ${LIBDIR})
+         if(HAVE_DLOPEN)
+-                _append(EXTRA_LIBS_ACNGFS dl)
++                list(APPEND EXTRA_LIBS_ACNGFS dl)
+         endif()
++        IF(CMAKE_SYSTEM MATCHES "Darwin")
++                list(APPEND EXTRA_LIBS_ACNGFS fmemopen)
++        ENDIF()
+         TARGET_LINK_LIBRARIES(acngfs ${fuse_LDFLAGS} ${BaseNetworkLibs} ${SSL_LIB_LIST} ${EXTRA_LIBS_ACNGFS} ${CMAKE_THREAD_LIBS_INIT})
+
+ else(fuse_FOUND AND HAVE_FUSE_25)
+         message("- FUSE not found or not compatible, not building acngfs")
+ endif(fuse_FOUND AND HAVE_FUSE_25)
+-
+-
+diff --git a/homebrew/CMakeLists.txt b/homebrew/CMakeLists.txt
+new file mode 100644
+index 0000000..4cae09c
+--- /dev/null
++++ b/homebrew/CMakeLists.txt
+@@ -0,0 +1,12 @@
++IF(DEFINED HOMEBREW_PREFIX)
++    set(LOGROTATE_FILE_STAGE_PATH "${CMAKE_CURRENT_BINARY_DIR}/apt-cacher-ng.logrotate")
++    CONFIGURE_FILE(apt-cacher-ng.logrotate.in ${LOGROTATE_FILE_STAGE_PATH})
++    install(FILES ${LOGROTATE_FILE_STAGE_PATH} DESTINATION "${HOMEBREW_PREFIX}/etc/logrotate.d")
++
++    set(WRAPPER_SCRIPT_STAGE_PATH "${CMAKE_CURRENT_BINARY_DIR}/acng-wrapper.sh")
++    CONFIGURE_FILE(acng-wrapper.sh.in ${WRAPPER_SCRIPT_STAGE_PATH})
++    install(FILES ${WRAPPER_SCRIPT_STAGE_PATH}
++            DESTINATION ${SBINDIR}
++            #paranoid permissions on wrapper script
++            PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ WORLD_READ)
++ENDIF()
+\ No newline at end of file
+diff --git a/homebrew/acng-wrapper.sh.in b/homebrew/acng-wrapper.sh.in
+new file mode 100644
+index 0000000..6333a9f
+--- /dev/null
++++ b/homebrew/acng-wrapper.sh.in
+@@ -0,0 +1,14 @@
++#!/bin/bash
++
++# wrapper script to enforce service dependency between apt-cacher-ng and logrotate
++
++BREWCMD=@HOMEBREW_PREFIX@/bin/brew
++
++if ! BREWCMD services start logrotate >/dev/null 2>&1; then
++    >&2 echo "'brew services start logrotate. failed."
++    >&2 echo "Skipping apt-cacher-ng start to protect disk space."
++    exit 1
++fi
++
++# Launch apt-cacher-ng
++@SBINDIR@/apt-cacher-ng -c @CFGDIR@ ForeGround=1
+diff --git a/homebrew/apt-cacher-ng.logrotate.in b/homebrew/apt-cacher-ng.logrotate.in
+new file mode 100644
+index 0000000..422ee79
+--- /dev/null
++++ b/homebrew/apt-cacher-ng.logrotate.in
+@@ -0,0 +1,27 @@
++@HOMEBREW_PREFIX@/var/log/apt-cacher-ng/apt-cache*.log {
++        size 10M
++        missingok
++        rotate 7
++        compress
++        delaycompress
++        notifempty
++        create
++        postrotate
++                launchctl kill SIGUSR1 @LAUNCHD_SERVICE_TARGET@
++        endscript
++}
++
++@HOMEBREW_PREFIX@/var/log/apt-cacher-ng/apt-cache*.err {
++        daily
++        notifempty
++        missingok
++        rotate 7
++        compress
++        delaycompress
++        create
++        postrotate
++                launchctl kill SIGUSR1 @LAUNCHD_SERVICE_TARGET@
++        endscript
++}
++
++
+diff --git a/include/fileio.h b/include/fileio.h
+index e3ea798..16a5f64 100644
+--- a/include/fileio.h
++++ b/include/fileio.h
+@@ -16,6 +16,12 @@
+ #include <cstdio>
+ #include <unistd.h>
+
++#ifdef _DARWIN_C_SOURCE
++#	define st_atim st_atimespec
++#	define st_ctim st_ctimespec
++#	define st_mtim st_mtimespec
++#endif
++
+ #ifdef HAVE_LINUX_SENDFILE
+ #include <sys/sendfile.h>
+ #endif
+diff --git a/source/meta.cc b/source/meta.cc
+index 30f74c7..6f631eb 100644
+--- a/source/meta.cc
++++ b/source/meta.cc
+@@ -9,6 +9,7 @@
+ #include <cstdio>
+ #include <iostream>
+ #include <algorithm>
++#include <fmemopen.h>
+
+ #ifdef HAVE_WORDEXP
+ #include <wordexp.h>

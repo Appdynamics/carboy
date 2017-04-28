@@ -23,29 +23,11 @@ class AptCacherNg < Formula
   depends_on "logrotate" => :run
 
   patch do
-    # Patch CMakeLists.txt to include -std=c++11 in its clang++ flags
-    url "https://raw.githubusercontent.com/mprzybylski/carboy/develop/patches/apt-cacher-ng_osx-cxxflags.patch"
-    sha256 "ff6fc8b3d844b095aafcfcd47bbfc948e2f405ad13e0add602534fcc27a442db"
+    # Rollup of all MacOS / Homebrew compile and install fixes
+    url "https://raw.githubusercontent.com/mprzybylski/carboy/develop/patches/apt-cacher-ng_homebrew_build_rollup.patch"
+    sha256 "4138746b65b0c61a4461be60e58d12c027f8c63c7be847559d56826e35ce6a2b"
   end
 
-  patch do
-    # OS X names its atime, mtime, and ctime fields differently from Linux.
-    # fixes issue similar to https://github.com/tavianator/bfs/issues/12
-    # patterned after https://github.com/tavianator/bfs/pull/13/files#diff-8b2aa0a4ac567369abb850524cda081c
-    url "https://raw.githubusercontent.com/mprzybylski/carboy/develop/patches/apt-cacher-ng_osx-timespec-aliases.patch"
-    sha256 "b7706efb8b8fc0884608b307cab92980c0d246d074a9b06c80cf68d8cfd81bfc"
-  end
-
-  patch do
-    # apt-cacher-ng relies on the Linux-only system call fmemopen()
-    # patch an emulation wrapper for fmemopen() into the build.
-    url "https://raw.githubusercontent.com/mprzybylski/carboy/develop/patches/apt-cacher-ng_include-fmemopen.patch"
-    sha256 "c8b814ac098d335528a58912ed6158e9d3bc36995a271d94c3109cf36a436eef"
-  end
-
-  patch do
-
-  end
 
   # see http://www.rubydoc.info/github/Homebrew/brew/Formula#plist-instance_method
   def plist; <<-PLIST.undent
