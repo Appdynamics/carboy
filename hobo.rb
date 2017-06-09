@@ -7,8 +7,7 @@ class Hobo < Formula
   version_scheme 0
   revision 0
 
-  #FIXME: point to GitHub URL once hobo goes public
-  head "file:///Users/mikep/appdynamics/hobo", :branch => "develop", :using => :git
+  head "git@github.com:Appdynamics/hobo.git", :branch => "develop", :using => :git
 
   resource "live-image-iso"  do
     url "https://github.com/Appdynamics/lab-on-a-laptop-bootstrap-image/releases/download/0.5/live-image-amd64.hybrid.iso"
