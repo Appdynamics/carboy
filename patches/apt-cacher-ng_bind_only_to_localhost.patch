@@ -1,0 +1,12 @@
+diff --git a/conf/acng.conf.in b/conf/acng.conf.in
+index 5b9201a..bf143be 100644
+--- a/conf/acng.conf.in
++++ b/conf/acng.conf.in
+@@ -46,6 +46,7 @@ SupportDir: @LIBDIR@
+ # Default: listens on all interfaces and protocols
+ #
+ # BindAddress: localhost 192.168.7.254 publicNameOnMainInterface
++BindAddress: localhost
+
+ # The specification of another HTTP proxy which shall be used for downloads.
+ # It can include user name and password but see the manual for limitations.

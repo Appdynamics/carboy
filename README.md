@@ -1,13 +1,19 @@
 # Usage
-* Add this tap to your brew installation with `brew tap mprzybylski/carboy`
+* Add this tap to your brew installation with `brew tap appdynamics/fermenter`
 * `brew search` and `brew install` like you normally would.
 * See the `brew(1)` man page for more details.
+
+# TODO:
+* Document brew's Xcode command line tool requirement
+* Complete one-touch install script 
+* Test on freshly imaged laptop
+* Document one-touch install flow
 
 # Formulae
 
 ## apt-cacher-ng
 
-* **Description:** A caching proxy. Specialized for package files from Linux distributors, primarily for Debian (and Debian based) distributions but not limited to those.
+* **Description:** A caching proxy. Specialized for package files from Linux distributions, primarily for Debian (and Debian based) distributions but not limited to those.
 * **Project Page:** [https://www.unix-ag.uni-kl.de/~bloch/acng/](https://www.unix-ag.uni-kl.de/~bloch/acng/)
 
 ### Notes
@@ -19,6 +25,6 @@ BindAddress: 192.168.56.1 localhost
 ```
 
 
-## fmemopen
+## libfmemopen
 * **Description:** C wrapper around BSD funopen() to emulate Linux fmemopen()
 * **Project Page:** https://github.com/mprzybylski/darwin-fmemopen

@@ -9,19 +9,29 @@ class Hobo < Formula
 
   head "git@github.com:Appdynamics/hobo.git", :branch => "develop", :using => :git
 
-  resource "live-image-iso"  do
-    url "https://github.com/Appdynamics/lab-on-a-laptop-bootstrap-image/releases/download/0.5/live-image-amd64.hybrid.iso"
-    sha256 "bd353be727422d9a56cd09aad2b7c53f95f382ef7c09e5b1e0758ef2b89b0a3d"
+  @@live_iso_resource_name="live-iso"
+  @@live_iso_basename="live-image-amd64.hybrid.iso"
+
+  resource @@live_iso_resource_name  do
+    #FIXME: repoint to GitHub URL before next release
+    url "file:///Users/mikep/Downloads/#{@@live_iso_basename}"
+    #sha256 ""
   end
 
   depends_on "cmake" => :build
   depends_on "apt-cacher-ng" => :run
+  # TODO: uncomment once DNS manipulation scripts are ready
+  # depends_on "pdns" => [:run, "with-postgresql"]
 
   def install
-    system "cmake", ".", *std_cmake_args, "-DSHAREDIR=#{pkgshare}"
+    system "cmake", ".", *std_cmake_args, "-DHOMEBREW_PREFIX=#{HOMEBREW_PREFIX}", "-DSHAREDIR=#{pkgshare}",
+           "-DCFGDIR=#{etc}/#{name}"
     system "make", "install"
 
-    pkgshare.install resource("live-image-iso").files
+    live_iso=resource(@@live_iso_resource_name)
+    live_iso.fetch
+    pkgshare.mkpath
+    FileUtils.cp live_iso.cached_download, "#{pkgshare}/#{@@live_iso_basename}"
   end
 
   #TODO: force cleanup of previous versions?

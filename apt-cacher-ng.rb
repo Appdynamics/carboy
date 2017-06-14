@@ -10,22 +10,34 @@ class AptCacherNg < Formula
   sha256 "9dffe361d5b82608dc1b4e8c8f8432216d0bd7732b0eeea77dbfcba2cc47f587"
   version "3-4"
   version_scheme 0
-  revision 7
-
-  #TODO: add HEAD pointer
+  revision 8
 
   depends_on "pkg-config" => :build # so that cmake can find all of its dependencies
   depends_on "cmake" => :build
-  depends_on "openssl" => :build
-  depends_on :osxfuse => :build
-  depends_on "xz" => :build
-  depends_on "libfmemopen" => :build
+  depends_on "openssl"
+  depends_on "xz"
+  depends_on :osxfuse => :optional
+  depends_on "libfmemopen" => "with-osxfuse"
   depends_on "logrotate" => :run
+
+  def caveats
+    <<-EOS.undent
+      Note: apt-cacher-ng only binds to localhost by default.  To bind to other
+      interfaces, please specify their addresses in the 'BindAddress: ...' line
+      of #{etc}/#{name}
+    EOS
+  end
 
   patch do
     # Rollup of all MacOS / Homebrew compile and install fixes
-    url "https://raw.githubusercontent.com/mprzybylski/carboy/develop/patches/apt-cacher-ng_homebrew_build_rollup.patch"
+    url "https://github.com/Appdynamics/fermenter/raw/develop/patches/apt-cacher-ng_homebrew_build_rollup.patch"
     sha256 "d2e98517e2dcde418f95689131ccb1f1acb966ac07797eefe18f4d72f3714f3e"
+  end
+
+  patch do
+    # Bind only to localhost by default
+    url "https://github.com/Appdynamics/fermenter/raw/develop/patches/apt-cacher-ng_bind_only_to_localhost.patch"
+    sha256 "ef86110f72a8062064c48239edbe8b040901a817c93824d40d778eb0310d2d51"
   end
 
   # for automatic start at login time
