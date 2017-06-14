@@ -1,12 +1,3 @@
-diff --git a/.gitignore b/.gitignore
-index 3e867bd..1cae86f 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -21,3 +21,4 @@ test/misc
- conf/*test.conf
- doc/Makefile
- **/.gitignore
-+/cmake-build-debug/
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 1340ab1..6c4bdc3 100644
 --- a/CMakeLists.txt
