@@ -17,7 +17,7 @@ class AptCacherNg < Formula
   depends_on "openssl"
   depends_on "xz"
   depends_on :osxfuse => :optional
-  depends_on "libfmemopen" => "with-osxfuse"
+  depends_on "libfmemopen" => [:optional, "with-osxfuse"]
   depends_on "logrotate" => :run
 
   def caveats
@@ -28,15 +28,16 @@ class AptCacherNg < Formula
     EOS
   end
 
+  # FIXME: re-roll patch to only require libfmemopen if building acng fuse driver
   patch do
     # Rollup of all MacOS / Homebrew compile and install fixes
     url "https://github.com/Appdynamics/fermenter/raw/develop/patches/apt-cacher-ng_homebrew_build_rollup.patch"
-    sha256 "d2e98517e2dcde418f95689131ccb1f1acb966ac07797eefe18f4d72f3714f3e"
+    sha256 "ab5c7e7d7a7fbd2670e478a96b9545934f1e4136574652eacbedc989fa104df8"
   end
 
   patch do
     # Bind only to localhost by default
-    url "https://github.com/Appdynamics/fermenter/raw/develop/patches/apt-cacher-ng_bind_only_to_localhost.patch"
+    url "https://raw.githubusercontent.com/Appdynamics/fermenter/develop/patches/apt-cacher-ng_bind_only_to_localhost.patch"
     sha256 "ef86110f72a8062064c48239edbe8b040901a817c93824d40d778eb0310d2d51"
   end
 
@@ -68,8 +69,6 @@ class AptCacherNg < Formula
 end
 
   def install
-    # ENV.deparallelize  # if your formula fails when building in parallel
-
     system "cmake", ".", *std_cmake_args, "-DHOMEBREW_PREFIX=#{HOMEBREW_PREFIX}", "-DSYSCONFDIR=#{etc}",
            "-DLAUNCHD_SERVICE_TARGET=gui/#{Process.uid}/#{plist_name}"
     system "make", "install" # if this fails, try separate make/make install steps
@@ -78,7 +77,6 @@ end
   def post_install
     mkdir "#{HOMEBREW_PREFIX}/var/cache/apt-cacher-ng"
     mkdir "#{HOMEBREW_PREFIX}/var/log/apt-cacher-ng"
-
   end
 
   test do
