@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 1340ab1..6c4bdc3 100644
+index 1340ab1..5e8faef 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -26,20 +26,31 @@ INCLUDE(CheckSymbolExists)
@@ -67,16 +67,19 @@ index 1340ab1..6c4bdc3 100644
  FILE(READ "${CMAKE_SOURCE_DIR}/VERSION" ACVERSION)
  string(REPLACE "\n" "" ACVERSION ${ACVERSION})
  #MESSAGE(STATUS "Version: ${ACVERSION}")
-@@ -120,6 +131,8 @@ option(USE_SSL "Use OpenSSL library for TLS and other crypto functionality" on)
+@@ -120,6 +131,11 @@ option(USE_SSL "Use OpenSSL library for TLS and other crypto functionality" on)
 
  IF(CMAKE_SYSTEM MATCHES "Darwin")
          _append(ACNG_COMPFLAGS -D_DARWIN_C_SOURCE)
 +        #it seems like clang++ still needs to be explicitly told to support c++11
 +        _append(ACNG_CXXFLAGS -std=c++11)
++        # look for fmemopen(), 'REQUIRED' option will cause cmake fail if not present
++        pkg_check_modules(FMEMOPEN REQUIRED libfmemopen)
++        list(APPEND CompLibs fmemopen)
  ENDIF()
 
  IF(CMAKE_SYSTEM MATCHES "CYGWIN")
-@@ -382,14 +395,16 @@ add_subdirectory(fs)
+@@ -382,14 +398,16 @@ add_subdirectory(fs)
  add_subdirectory(source)
  add_subdirectory(conf)
  add_subdirectory(systemd)
@@ -95,7 +98,7 @@ index 1340ab1..6c4bdc3 100644
     set(MANDIR ${DATADIR}/man)
  endif()
  install(FILES doc/README doc/apt-cacher-ng.pdf DESTINATION ${DOCDIR})
-@@ -397,7 +412,7 @@ install(DIRECTORY doc/html/ DESTINATION ${HTMLDIR}
+@@ -397,7 +415,7 @@ install(DIRECTORY doc/html/ DESTINATION ${HTMLDIR}
     FILES_MATCHING PATTERN "*.*")
  install(DIRECTORY doc/man/ DESTINATION ${MANDIR}/man8
     FILES_MATCHING PATTERN "*.8")
@@ -155,10 +158,10 @@ index d50feea..6bb2545 100644
 -http://ftp.debian.org
 +http://ftp.debian.org/debian
 diff --git a/fs/CMakeLists.txt b/fs/CMakeLists.txt
-index 49791e3..7830186 100644
+index 49791e3..4d1586b 100644
 --- a/fs/CMakeLists.txt
 +++ b/fs/CMakeLists.txt
-@@ -24,12 +24,16 @@ if(fuse_FOUND AND HAVE_FUSE_25)
+@@ -24,12 +24,13 @@ if(fuse_FOUND AND HAVE_FUSE_25)
          SET_TARGET_PROPERTIES(acngfs PROPERTIES COMPILE_FLAGS "${ACNG_COMPFLAGS} ${ACNG_CXXFLAGS} ${acngfs_cflags}")
          INSTALL(TARGETS acngfs DESTINATION ${LIBDIR})
          if(HAVE_DLOPEN)
@@ -166,9 +169,6 @@ index 49791e3..7830186 100644
 +                list(APPEND EXTRA_LIBS_ACNGFS dl)
          endif()
 +        IF(CMAKE_SYSTEM MATCHES "Darwin")
-+                # look for fmemopen(), 'REQUIRED' option will cause cmake fail if not present
-+                pkg_check_modules(FMEMOPEN REQUIRED libfmemopen)
-+                # list(APPEND CompLibs fmemopen) #not sure this is required..
 +                list(APPEND EXTRA_LIBS_ACNGFS fmemopen)
 +        ENDIF()
          TARGET_LINK_LIBRARIES(acngfs ${fuse_LDFLAGS} ${BaseNetworkLibs} ${SSL_LIB_LIST} ${EXTRA_LIBS_ACNGFS} ${CMAKE_THREAD_LIBS_INIT})

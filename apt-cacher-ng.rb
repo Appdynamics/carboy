@@ -16,8 +16,8 @@ class AptCacherNg < Formula
   depends_on "cmake" => :build
   depends_on "openssl"
   depends_on "xz"
+  depends_on "libfmemopen"
   depends_on :osxfuse => :optional
-  depends_on "libfmemopen" => [:optional, "with-osxfuse"]
   depends_on "logrotate" => :run
 
   def caveats
@@ -28,11 +28,10 @@ class AptCacherNg < Formula
     EOS
   end
 
-  # FIXME: re-roll patch to only require libfmemopen if building acng fuse driver
   patch do
     # Rollup of all MacOS / Homebrew compile and install fixes
-    url "https://github.com/Appdynamics/fermenter/raw/develop/patches/apt-cacher-ng_homebrew_build_rollup.patch"
-    sha256 "66e748bb6892ecfe8135c0419d9e723da66b00457de5e1e3905d33ce1c5fedc1"
+    url "https://raw.githubusercontent.com/Appdynamics/fermenter/develop/patches/apt-cacher-ng_homebrew_build_rollup.patch"
+    sha256 "dbcba1c779200ea90ece927b77ad59f94dc85cfb09ae266daf49039bedb50e48"
   end
 
   patch do
